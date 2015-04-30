@@ -44,11 +44,12 @@ def readGazeFile():
 
 def readPuzzleFile():
     puzzleFile = open('gameStateData.csv', 'r')
-    touches = []
+    current_clicks = {}
     for line in puzzleFile:
         line = line.split(",")
         for i in range(1, len(line)):
             line[i] = line[i].replace(" ", "")
+            line[i] = line[i].replace("\n", "")
         if not line[0] == 'time':
             currentTime = datetime.datetime.strptime(line[0], "%Y-%m-%d %H:%M:%S.%f")
         if (line.__len__() >= 8 and line[4].isdigit() and line[5].isdigit()):
@@ -64,24 +65,20 @@ def readPuzzleFile():
                 else:
                     status.append([currentTime, int(line[4]), int(line[5]), line[6]])
             puzzleCoordinates.append(copy.deepcopy(status))
-        elif (line[2][:6] == 'Stage '):
+        elif (line[1][:6] == 'Stage '):
             puzzleCoordinates.append([])
-        '''
-        elif (line.__len__() >= 8 and line[4] == 'Touch Down'):
-            touches[line[7]] =
-        elif (line.__len__() >= 8 and line[4] == 'Touch Up'):
-            for ch in touches:
-                if (ch[0] == line[6] and len(ch) == 3):
-                    ch.append(currentTime)
-        '''
-    clickHistory = processTouches(touches)
+        elif (line.__len__() >= 8 and line[4] == 'TouchDown'):
+            print current_clicks
+            current_clicks[line[7]] = line[6]
+            start_time = currentTime
+        elif (line.__len__() >= 8 and line[4] == 'TouchUp'):
+            print current_clicks
+            keys = current_clicks.keys()
+            if len(keys) >= 2:
+                clickHistory.append([start_time, currentTime, current_clicks[keys[0]], current_clicks[keys[1]],
+                                     keys[0], keys[1]])
+            current_clicks.pop(line[7])
     return
-
-# given all the touches, return a list of time intervals with valid clicks
-def processTouches(touches):
-    clicks = []
-    count = 0
-    for t in touches:
 
 
 
@@ -137,5 +134,4 @@ readGazeFile()
 readPuzzleFile()
 findStaring()
 
-for p in staredPictures:
-    print p
+print clickHistory
