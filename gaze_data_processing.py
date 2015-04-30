@@ -11,11 +11,25 @@ import copy
 
 from datetime import timedelta
 
+# global vars
+
 gazeCoordinates = []
+# list of [time, x, y]
+
 puzzleCoordinates = []
+# list of [time, [last_move_time, x, y, piece_name] ...]
+
 staredPictures=[]
+# list of [time, x, y, piece_time]
+
 clickHistory = []
+# list of [start_time, end_time, piece_clicked_by_A, piece_clicked_by_B]
+
+
 gazeIndex=0 ;puzzleIndex=0;
+
+
+
 # reads the gaze file and store x and y coordinates into the gazeCoordinate variable.
 # Does not read the received data.
 def readGazeFile():
@@ -30,11 +44,13 @@ def readGazeFile():
 
 def readPuzzleFile():
     puzzleFile = open('gameStateData.csv', 'r')
+    touches = []
     for line in puzzleFile:
         line = line.split(",")
         for i in range(1, len(line)):
             line[i] = line[i].replace(" ", "")
-        currentTime = datetime.datetime.strptime(line[0], "%Y-%m-%d %H:%M:%S.%f")
+        if not line[0] == 'time':
+            currentTime = datetime.datetime.strptime(line[0], "%Y-%m-%d %H:%M:%S.%f")
         if (line.__len__() >= 8 and line[4].isdigit() and line[5].isdigit()):
             if (len(puzzleCoordinates) == 0):
                 status = [currentTime, [currentTime, int(line[4]), int(line[5]), line[6]]]
@@ -48,16 +64,26 @@ def readPuzzleFile():
                 else:
                     status.append([currentTime, int(line[4]), int(line[5]), line[6]])
             puzzleCoordinates.append(copy.deepcopy(status))
-        elif (line[4] == 'Touch Down'):
-            clickHistory.append([line[6], currentTime])
-        elif (line[4] == 'Touch Up'):
-            for ch in clickHistory:
-                if (ch[0] == line[6] and len(ch) == 2):
-                    ch.append(currentTime)
-        # click history
         elif (line[2][:6] == 'Stage '):
             puzzleCoordinates.append([])
-    return puzzleCoordinates
+        '''
+        elif (line.__len__() >= 8 and line[4] == 'Touch Down'):
+            touches[line[7]] =
+        elif (line.__len__() >= 8 and line[4] == 'Touch Up'):
+            for ch in touches:
+                if (ch[0] == line[6] and len(ch) == 3):
+                    ch.append(currentTime)
+        '''
+    clickHistory = processTouches(touches)
+    return
+
+# given all the touches, return a list of time intervals with valid clicks
+def processTouches(touches):
+    clicks = []
+    count = 0
+    for t in touches:
+
+
 
 
 def isStaring(gazeData, puzzleData, clickData):
@@ -109,5 +135,7 @@ def findStaring():
 
 readGazeFile()
 readPuzzleFile()
-
 findStaring()
+
+for p in staredPictures:
+    print p
