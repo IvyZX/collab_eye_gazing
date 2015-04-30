@@ -50,34 +50,35 @@ def readPuzzleFile():
         for i in range(1, len(line)):
             line[i] = line[i].replace(" ", "")
             line[i] = line[i].replace("\n", "")
-        if not line[0] == 'time':
-            currentTime = datetime.datetime.strptime(line[0], "%Y-%m-%d %H:%M:%S.%f")
-        if (line.__len__() >= 8 and line[4].isdigit() and line[5].isdigit()):
-            if (len(puzzleCoordinates) == 0):
-                status = [currentTime, [currentTime, int(line[4]), int(line[5]), line[6]]]
-            else:
-                status = puzzleCoordinates[-1]
-                status[0] = currentTime
-                pieces = [s[3] for s in status[1:]]
-                if line[6] in pieces:
-                    i = pieces.index(line[6]) + 1
-                    status[i] = [currentTime, int(line[4]), int(line[5]), line[6]]
+        if line.__len__() >= 8:
+            if not line[0] == 'time':
+                currentTime = datetime.datetime.strptime(line[0], "%Y-%m-%d %H:%M:%S.%f")
+            if ( line[4].isdigit() and line[5].isdigit()):
+                if (len(puzzleCoordinates) == 0):
+                    status = [currentTime, [currentTime, int(line[4]), int(line[5]), line[6]]]
                 else:
-                    status.append([currentTime, int(line[4]), int(line[5]), line[6]])
-            puzzleCoordinates.append(copy.deepcopy(status))
-        elif (line[1][:6] == 'Stage '):
-            puzzleCoordinates.append([])
-        elif (line.__len__() >= 8 and line[4] == 'TouchDown'):
-            print current_clicks
-            current_clicks[line[7]] = line[6]
-            start_time = currentTime
-        elif (line.__len__() >= 8 and line[4] == 'TouchUp'):
-            print current_clicks
-            keys = current_clicks.keys()
-            if len(keys) >= 2:
-                clickHistory.append([start_time, currentTime, current_clicks[keys[0]], current_clicks[keys[1]],
-                                     keys[0], keys[1]])
-            current_clicks.pop(line[7])
+                    status = puzzleCoordinates[-1]
+                    status[0] = currentTime
+                    pieces = [s[3] for s in status[1:]]
+                    if line[6] in pieces:
+                        i = pieces.index(line[6]) + 1
+                        status[i] = [currentTime, int(line[4]), int(line[5]), line[6]]
+                    else:
+                        status.append([currentTime, int(line[4]), int(line[5]), line[6]])
+                puzzleCoordinates.append(copy.deepcopy(status))
+            elif (line[1][:6] == 'Stage '):
+                puzzleCoordinates.append([])
+            elif (line[4] == 'TouchDown'):
+                #print current_clicks
+                current_clicks[line[7]] = line[6]
+                start_time = currentTime
+            elif (line[4] == 'TouchUp'):
+                #print current_clicks
+                keys = current_clicks.keys()
+                if len(keys) >= 2:
+                    clickHistory.append([start_time, currentTime, current_clicks[keys[0]], current_clicks[keys[1]],
+                                         keys[0], keys[1]])
+                current_clicks.pop(line[7])
     return
 
 
@@ -86,16 +87,16 @@ def readPuzzleFile():
 def isStaring(gazeData, puzzleData, clickData):
     accuracy=50 # Only counts as looking at a piece when the coordinates are within a range of 50
     for puzzle in puzzleData[1:]:
-        ###NEED CHANGE. CHANGE 100
-        if(puzzle[3]==clickData[3] and abs(gazeData[1]-puzzle[1])<=accuracy and abs(gazeData[2]-puzzle[2])<=accuracy):
-            print(puzzle[3])
+        if(puzzle[3]==clickData[2] and abs(gazeData[1]-puzzle[1])<=accuracy and abs(gazeData[2]-puzzle[2])<=accuracy):
+            #print(puzzle[3])
             staredPictures.append([gazeData[0],clickData[4],clickData[5],clickData[2],clickData[3],True,False])
             return True
-        elif(puzzle[3]==clickData[4] and abs(gazeData[1]-puzzle[1])<=accuracy and abs(gazeData[2]-puzzle[2])<=accuracy):
-            print(puzzle[3])
+        elif(puzzle[3]==clickData[3] and abs(gazeData[1]-puzzle[1])<=accuracy and abs(gazeData[2]-puzzle[2])<=accuracy):
+            #print(puzzle[3])
             staredPictures.append([gazeData[0],clickData[4],clickData[5],clickData[2],clickData[3],False,True])
             return True
             #return puzzleData[3]
+    staredPictures.append([gazeData[0],clickData[4],clickData[5],clickData[2],clickData[3],False,False])
     return False
 
 def findStaring():
