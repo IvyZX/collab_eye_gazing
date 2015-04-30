@@ -1,4 +1,10 @@
 __author__ = 'Jerry', 'Ivy'
+# The goal for this program is to
+# 1. Check when people are moving pieces.
+# 2. If they are moving pieces, whether they are looking at the pieces they're moving or their partner is moving.
+# 3. Input: Gaze data in ReleaseGazeData.csv and puzzle data in gameStateData.csv.
+# 4. Output: A csv file that have: time, which pieces they are moving (two pieces), are they staring at their own piece?
+# Are they staring at their partner's piece?
 import time
 import datetime
 import copy
@@ -54,23 +60,38 @@ def readPuzzleFile():
     return puzzleCoordinates
 
 
-def isStaring(gazeData, puzzleData):
+def isStaring(gazeData, puzzleData, clickData):
+    accuracy=50 # Only counts as looking at a piece when the coordinates are within a range of 50
     for puzzle in puzzleData[1:]:
         ###NEED CHANGE. CHANGE 100
-        if(abs(gazeData[1]-puzzle[1])<=100 and abs(gazeData[2]-puzzle[2])<=100):
+        if(puzzle[3]==clickData[3] and abs(gazeData[1]-puzzle[1])<=accuracy and abs(gazeData[2]-puzzle[2])<=accuracy):
             print(puzzle[3])
-            staredPictures.append([gazeData[0],puzzle[1],puzzle[2],puzzle[3]])
+            staredPictures.append([gazeData[0],clickData[4],clickData[5],clickData[2],clickData[3],True,False])
+            return True
+        elif(puzzle[3]==clickData[4] and abs(gazeData[1]-puzzle[1])<=accuracy and abs(gazeData[2]-puzzle[2])<=accuracy):
+            print(puzzle[3])
+            staredPictures.append([gazeData[0],clickData[4],clickData[5],clickData[2],clickData[3],False,True])
             return True
             #return puzzleData[3]
     return False
 
 def findStaring():
+    if len(gazeCoordinates)<=0 or len(puzzleCoordinates)<=0 or len(clickHistory)<=0:
+        return
+    staredPictures.append(["time","A's ID","B's ID","A Clicks","B Clicks", "Looking at A's piece","Looking at B's piece"])
     gazeIndex=0
     puzzleIndex=0
-    while (gazeIndex<len(gazeCoordinates) and puzzleIndex<len(puzzleCoordinates)):
-        if (len(gazeCoordinates)<=0 or len(puzzleCoordinates)<=0 or
-                    gazeIndex>=len(gazeCoordinates) or puzzleIndex>=len(puzzleCoordinates)):
+    historyIndex=0
+    while (gazeIndex<len(gazeCoordinates) and puzzleIndex<len(puzzleCoordinates) and historyIndex<len(clickHistory)):
+        # If anything goes out of range, return.
+        if (gazeIndex>=len(gazeCoordinates) or puzzleIndex>=len(puzzleCoordinates) or historyIndex>=len(clickHistory)):
             return
+        # move the puzzle coordinates to the time when participants click the puzzles
+        elif(puzzleCoordinates[puzzleIndex][0]<clickHistory[historyIndex][0]):
+            puzzleIndex+=1
+        # move the history index to next click history when participants stopped clicking.
+        elif(puzzleCoordinates[puzzleIndex][0]>clickHistory[historyIndex][1]):
+            historyIndex+=1
         elif(gazeCoordinates[gazeIndex][0]<puzzleCoordinates[puzzleIndex][0]):
             #we need the gaze's time to be later than the time that puzzle shows up/get updated
             gazeIndex+=1
@@ -79,11 +100,11 @@ def findStaring():
             #if the gaze surpases the next timestamp when puzzle got updated, move on to the next puzzle status.
             puzzleIndex+=1
         else:
-            isStaring(gazeCoordinates[gazeIndex],puzzleCoordinates[puzzleIndex])
+            isStaring(gazeCoordinates[gazeIndex],puzzleCoordinates[puzzleIndex],clickHistory[historyIndex])
             gazeIndex+=1
     resultFile = open('result.csv', 'w')
     for line in staredPictures:
-        resultFile.write(str(line[0])+','+str(line[1])+','+str(line[2])+','+str(line[3])+','+'\n')
+        resultFile.write(str(line[0])+','+str(line[1])+','+str(line[2])+','+str(line[3])+','+str(line[4])+','+str(line[5])+','+str(line[6])+'\n')
 
 
 readGazeFile()
