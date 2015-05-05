@@ -8,6 +8,7 @@ __author__ = 'Jerry', 'Ivy'
 import time
 import datetime
 import copy
+import re
 
 from datetime import timedelta
 
@@ -85,7 +86,7 @@ def readPuzzleFile():
 
 
 def isStaring(gazeData, puzzleData, clickData):
-    accuracy=50 # Only counts as looking at a piece when the coordinates are within a range of 50
+    accuracy=55 # Only counts as looking at a piece when the coordinates are within a range of 50
     for puzzle in puzzleData[1:]:
         if(puzzle[3]==clickData[2] and abs(gazeData[1]-puzzle[1])<=accuracy and abs(gazeData[2]-puzzle[2])<=accuracy):
             #print(puzzle[3])
@@ -129,10 +130,35 @@ def findStaring():
     resultFile = open('result.csv', 'w')
     for line in staredPictures:
         resultFile.write(str(line[0])+','+str(line[1])+','+str(line[2])+','+str(line[3])+','+str(line[4])+','+str(line[5])+','+str(line[6])+'\n')
+    resultFile.close()
+
+    # Write the accuracy data.
+    resultFile=open('accuracy.csv','w')
+    resultFile.write('A\'s ID,B\'s ID,Puzzle Name,Accuracy\n')
+    counter=0
+    positives=0
+    currentPuzzle=''
+    currentAName=''
+    currentBName=''
+    for line in staredPictures[1:]:
+        if  (currentAName!=str(line[1]) or currentBName!=str(line[2]) or currentPuzzle!=str(re.match('(\w+\d+)(?:_)',str(line[3])).group(1))):
+            if (counter!=0):
+                resultFile.write(currentAName+','+currentBName+','+currentPuzzle+','+str(float(positives)/counter)+'\n')
+            currentAName=str(line[1])
+            currentBName=str(line[2])
+            currentPuzzle=str(re.match('(\w+\d+)(?:_)',str(line[3])).group(1))
+            print currentPuzzle
+            counter=0
+            positives=0
+        if line[5]==True or line[6]==True:
+            positives+=1
+        counter+=1
+    if (counter!=0):
+        resultFile.write(currentAName+','+currentBName+','+currentPuzzle+','+str(float(positives)/counter)+'\n')
 
 
 readGazeFile()
 readPuzzleFile()
 findStaring()
 
-print clickHistory
+# print clickHistory
