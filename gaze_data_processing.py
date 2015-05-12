@@ -68,7 +68,7 @@ def readPuzzleFile():
                     else:
                         status.append([currentTime, int(line[4]), int(line[5]), line[6]])
                 puzzleCoordinates.append(copy.deepcopy(status))
-            elif (line[1][:6] == 'Stage '):
+            elif (line[1][:5] == 'Stage'):
                 puzzleCoordinates.append([])
             elif (line[4] == 'TouchDown'):
                 #print current_clicks
@@ -141,13 +141,14 @@ def findStaring():
     currentPuzzle=''
     currentAName=''
     currentBName=''
+    print staredPictures
     for line in staredPictures[1:]:
         if  (currentAName!=str(line[1]) or currentBName!=str(line[2]) or currentPuzzle!=str(re.match('(\w+\d+)(?:_)',str(line[3])).group(1))):
             if (counter!=0):
                 resultFile.write(currentAName+','+currentBName+','+currentPuzzle+','+str(float(positives)/counter)+'\n')
             currentAName=str(line[1])
             currentBName=str(line[2])
-            currentPuzzle=str(re.match('(\w+\d+)(?:_)',str(line[3])).group(1))
+            currentPuzzle=str(re.match('(\w+\d*)(?:_)',str(line[3])).group(1))
             print currentPuzzle
             counter=0
             positives=0
@@ -160,6 +161,10 @@ def findStaring():
 
 readGazeFile()
 readPuzzleFile()
+#print gazeCoordinates
+print puzzleCoordinates
+print staredPictures
+print clickHistory
 findStaring()
 
 # print clickHistory
