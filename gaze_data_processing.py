@@ -69,11 +69,7 @@ def readPuzzleFile():
                     else:
                         status.append([currentTime, int(line[4]), int(line[5]), line[6]])
                 puzzleCoordinates.append(copy.deepcopy(status))
-<<<<<<< HEAD
-            elif (line[1][:5] == 'Stage'):
-=======
             elif (line[0] == 'time' and type(currentTime) != type(None)):
->>>>>>> origin/master
                 puzzleCoordinates.append([])
                 keys = current_clicks.keys()
                 if len(keys) >= 2:
@@ -171,14 +167,5 @@ def findStaring():
 
 readGazeFile()
 readPuzzleFile()
-<<<<<<< HEAD
-#print gazeCoordinates
-print puzzleCoordinates
-print staredPictures
-print clickHistory
 findStaring()
-=======
-#findStaring()
-
->>>>>>> origin/master
 
