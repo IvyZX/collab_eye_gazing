@@ -34,7 +34,7 @@ dateTimeFiles=['041410','041412','041416','041610','041611','042111','042117','0
 # reads the gaze file and store x and y coordinates into the gazeCoordinate variable.
 # Does not read the received data.
 def readGazeFile():
-    gazeFile = open('0512 data in seperate files\\ReleaseGazeData041410.csv', 'r')
+    gazeFile = open('0512 data in seperate files/ReleaseGazeData041410.csv', 'r')
     for line in gazeFile:
         line = line.replace("\n", "")
         line = line.split(",")
@@ -45,8 +45,9 @@ def readGazeFile():
 
 
 def readPuzzleFile():
-    puzzleFile = open('0512 data in seperate files\\GameStateData041410.csv', 'r')
+    puzzleFile = open('0512 data in seperate files/GameStateData041410.csv', 'r')
     current_clicks = {}
+    currentTime = None
     for line in puzzleFile:
         line = line.split(",")
         for i in range(1, len(line)):
@@ -55,8 +56,8 @@ def readPuzzleFile():
         if line.__len__() >= 8:
             if not (line[0] == 'time' or line[0] == ''):
                 currentTime = datetime.datetime.strptime(line[0], "%Y-%m-%d %H:%M:%S.%f")
-            if ( line[4].isdigit() and line[5].isdigit()):
-                if (len(puzzleCoordinates) == 0):
+            if (line[4].isdigit() and line[5].isdigit()):
+                if (len(puzzleCoordinates) == 0 or puzzleCoordinates[-1] == []):
                     status = [currentTime, [currentTime, int(line[4]), int(line[5]), line[6]]]
                 else:
                     status = puzzleCoordinates[-1]
@@ -68,8 +69,13 @@ def readPuzzleFile():
                     else:
                         status.append([currentTime, int(line[4]), int(line[5]), line[6]])
                 puzzleCoordinates.append(copy.deepcopy(status))
-            elif (line[1][:6] == 'Stage '):
+            elif (line[0] == 'time' and type(currentTime) != type(None)):
                 puzzleCoordinates.append([])
+                keys = current_clicks.keys()
+                if len(keys) >= 2:
+                    clickHistory.append([start_time, currentTime, current_clicks[keys[0]], current_clicks[keys[1]],
+                                         keys[0], keys[1]])
+                current_clicks = {}
             elif (line[4] == 'TouchDown'):
                 #print current_clicks
                 current_clicks[line[7]] = line[6]
@@ -160,6 +166,6 @@ def findStaring():
 
 readGazeFile()
 readPuzzleFile()
-findStaring()
+#findStaring()
 
-# print clickHistory
+
