@@ -29,22 +29,23 @@ clickHistory = []
 
 gazeIndex=0 ;puzzleIndex=0;
 
-
+dateTimeFiles=['041410','041412','041416','041610','041611','042111','042117','043011','043013','043014','050510','050514','050711']
 
 # reads the gaze file and store x and y coordinates into the gazeCoordinate variable.
 # Does not read the received data.
 def readGazeFile():
-    gazeFile = open('ReleaseGazeData.csv', 'r')
+    gazeFile = open('0512 data in seperate files\\ReleaseGazeData041410.csv', 'r')
     for line in gazeFile:
+        line = line.replace("\n", "")
         line = line.split(",")
         # print(type(line))
         if (line.__len__() >= 8 and line[3].isdigit() and line[5].isdigit() and line[2] == " X: "):
-            gazeCoordinates.append([datetime.datetime.strptime(line[7], "%Y-%m-%d %H:%M:%S.%f\n"), int(line[3]), int(line[5])])
+            gazeCoordinates.append([datetime.datetime.strptime(line[7], "%Y-%m-%d %H:%M:%S.%f"), int(line[3]), int(line[5])])
     return gazeCoordinates
 
 
 def readPuzzleFile():
-    puzzleFile = open('gameStateData.csv', 'r')
+    puzzleFile = open('0512 data in seperate files\\GameStateData041410.csv', 'r')
     current_clicks = {}
     for line in puzzleFile:
         line = line.split(",")
@@ -52,7 +53,7 @@ def readPuzzleFile():
             line[i] = line[i].replace(" ", "")
             line[i] = line[i].replace("\n", "")
         if line.__len__() >= 8:
-            if not line[0] == 'time':
+            if not (line[0] == 'time' or line[0] == ''):
                 currentTime = datetime.datetime.strptime(line[0], "%Y-%m-%d %H:%M:%S.%f")
             if ( line[4].isdigit() and line[5].isdigit()):
                 if (len(puzzleCoordinates) == 0):
